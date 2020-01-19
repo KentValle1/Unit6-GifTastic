@@ -6,42 +6,79 @@
 </head>
 <body>
 
-    <div id="butons"></div>
+    <div id="buttons"></div>
 
-    <form id="search">
+    <form id="search-form">
             <label for="search-input">Search if you dare!</label>
             <input type="text" id="search-input">
-            <input type="submit" value="Submit">
+            <input id='addSearch' type="submit" value="Submit">
     </form>
     <div id="searches"></div>
 
-    <script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(function(){
+        startingButtons(topics,'searchButton','#buttons');
+    })
     
+    var topics = ['Doom Eternal', ' The Witcher', 'Gears of War', 'God of War', 'Borderlands 3', 'League of Legends', 'CyberPunk 2077', 'The Outer Worlds', 'Death Stranding', 'Untitled Goose Game'];
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    function startingButtons(topics,nclass,startingButttons){
+    $(startingButttons).empty();
+    for(var i=0; i<topics.length; i++) {
+       var b = $('<button>');
+       b.addClass(nclass);
+       b.attr('data-type',topics[i]);
+       b.text(topics[i]);
+       $(startingButttons).append(b) 
+    }
+}
+    $(document).on("click",'.searchButton',function(){
+        var type = $(this).data('type');
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +type+ "&api_key=BkaUZZWcFij6J7AoQj3WtPb1R2p9O6V9&limit=10"
+        $.ajax({
+        url: queryURL,
+        method: "GET"
+      }).then(function(response) {
+          console.log(response)
+                for(var i=0;i<response.data.length;i++){
+                    var search = $('<div class="search-item">');
+                    var rating = response.data[i].rating;
+                    var p = $('<p>').text("rating:" +rating);
+                    var animated = response.data[i].images.fixed_height.url;
+                    var still = response.data[i].images.fixed_height_still.url;
+                    var image = $("<img>");
+                    image.attr("src",still);
+                    image.attr('data-still',still);
+                    image.attr('data-animated',animated);
+                    image.attr('data-state','still');
+                    image.addClass('searchImage');
+                    search.append(p);
+                    search.append(image);
+                    $('#searches').append(search)
+                }
+            })
+    })
+    $(document).on("click",'.searchImage', function(){
+        var state= $(this).data('state');
+        if(state === 'still') {
+        var animateVal = $(this).attr("data-animate");
+        $(this).attr("src", animateVal);
+        $(this).attr("data-state", "animate");
+      } else {
+          var stillVal= $(this).attr("data-still");
+            $(this).attr("src", stillVal);
+        $(this).attr("data-state", "still");
+      }
+        })
+
+    $('#addSearch').on('click',function(){
+        event.preventDefault()
+        var newSearch = $('input').eq(0).val();
+        topics.push(newSearch);
+        startingButtons(topics,"searchButton","#buttons");
+        return false;
+    })
     </script>
 </body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </html>
